@@ -73,35 +73,6 @@ byte height;
 #define MAX_BUFFER_SIZE IMAGE_WIDTH * IMAGE_HEIGHT * BYTES_PER_PIXEL
 byte imgBuffer[MAX_BUFFER_SIZE];
 
-// uint16_t readTranslateColor()
-// {
-//   if(Serial.available() >= 1)
-//   {
-//     byte incomingByte = Serial.read();
-
-//     buffer[bufferIndex] = incomingByte;
-
-//     if(bufferIndex >= 3)
-//     {
-//       int r = buffer[0];
-//       int g = buffer[1];
-//       int b = buffer[2];
-
-//       uint16_t color = matrix.Color(r,g,b);
-
-//       bufferIndex++;
-
-//       matrix.drawPixel(x, y, color);
-//       x++;
-//       if(x >= IMAGE_WIDTH)
-//       {
-//         x = 0;
-//         y++;
-//       }
-//     }
-//   }
-// }
-
 byte ReadNextByte()
 {
   while(!Serial.available())
