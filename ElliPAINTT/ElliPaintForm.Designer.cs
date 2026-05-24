@@ -68,7 +68,12 @@
             openFileDialog1 = new OpenFileDialog();
             sendProgressBar = new ProgressBar();
             animateOptions = new Button();
-            panel1 = new Panel();
+            frameCounter = new Label();
+            nextFrame = new Button();
+            previousFrame = new Button();
+            addFrame = new Button();
+            animatePanel = new Panel();
+            framesPanel = new FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)Canvas).BeginInit();
             BrushOptionsTabs.SuspendLayout();
             BrushTypeTab.SuspendLayout();
@@ -81,6 +86,7 @@
             ((System.ComponentModel.ISupportInitialize)ledDisplay).BeginInit();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)testPictureBox).BeginInit();
+            animatePanel.SuspendLayout();
             SuspendLayout();
             // 
             // Canvas
@@ -473,27 +479,82 @@
             // 
             // animateOptions
             // 
-            animateOptions.Location = new Point(833, 90);
+            animateOptions.Location = new Point(833, 77);
             animateOptions.Name = "animateOptions";
             animateOptions.Size = new Size(75, 23);
             animateOptions.TabIndex = 4;
             animateOptions.Text = "Animation";
             animateOptions.UseVisualStyleBackColor = true;
-            //animateOptions.Click += animateOptions_Click;
+            animateOptions.Click += animateOptions_Click;
             // 
-            // panel1
+            // frameCounter
             // 
-            panel1.Location = new Point(789, 119);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(172, 292);
-            panel1.TabIndex = 5;
+            frameCounter.AutoSize = true;
+            frameCounter.Location = new Point(64, 273);
+            frameCounter.Name = "frameCounter";
+            frameCounter.Size = new Size(24, 15);
+            frameCounter.TabIndex = 3;
+            frameCounter.Text = "1/1";
+            // 
+            // nextFrame
+            // 
+            nextFrame.Location = new Point(79, 291);
+            nextFrame.Name = "nextFrame";
+            nextFrame.Size = new Size(64, 23);
+            nextFrame.TabIndex = 1;
+            nextFrame.Text = "Next";
+            nextFrame.UseVisualStyleBackColor = true;
+            nextFrame.Click += nextFrame_Click;
+            // 
+            // previousFrame
+            // 
+            previousFrame.Location = new Point(13, 291);
+            previousFrame.Name = "previousFrame";
+            previousFrame.Size = new Size(60, 24);
+            previousFrame.TabIndex = 0;
+            previousFrame.Text = "Previous";
+            previousFrame.UseVisualStyleBackColor = true;
+            previousFrame.Click += previousFrame_Click;
+            // 
+            // addFrame
+            // 
+            addFrame.Location = new Point(125, 3);
+            addFrame.Name = "addFrame";
+            addFrame.Size = new Size(29, 23);
+            addFrame.TabIndex = 2;
+            addFrame.Text = "+";
+            addFrame.UseVisualStyleBackColor = true;
+            addFrame.Click += addFrame_Click;
+            // 
+            // animatePanel
+            // 
+            animatePanel.BorderStyle = BorderStyle.FixedSingle;
+            animatePanel.Controls.Add(framesPanel);
+            animatePanel.Controls.Add(frameCounter);
+            animatePanel.Controls.Add(addFrame);
+            animatePanel.Controls.Add(nextFrame);
+            animatePanel.Controls.Add(previousFrame);
+            animatePanel.Location = new Point(789, 106);
+            animatePanel.Name = "animatePanel";
+            animatePanel.Size = new Size(157, 318);
+            animatePanel.TabIndex = 5;
+            animatePanel.Visible = false;
+            // 
+            // framesPanel
+            // 
+            framesPanel.AutoScroll = true;
+            framesPanel.BackColor = SystemColors.Control;
+            framesPanel.Location = new Point(13, 12);
+            framesPanel.Name = "framesPanel";
+            framesPanel.Size = new Size(105, 258);
+            framesPanel.TabIndex = 4;
             // 
             // ElliPaintForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1085, 466);
-            Controls.Add(panel1);
+            ClientSize = new Size(997, 466);
+            Controls.Add(animatePanel);
             Controls.Add(animateOptions);
             Controls.Add(sendProgressBar);
             Controls.Add(BrushOptionsTabs);
@@ -518,6 +579,8 @@
             ((System.ComponentModel.ISupportInitialize)ledDisplay).EndInit();
             tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)testPictureBox).EndInit();
+            animatePanel.ResumeLayout(false);
+            animatePanel.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -563,6 +626,11 @@
         private PictureBox testPictureBox;
         private ProgressBar sendProgressBar;
         private Button animateOptions;
-        private Panel panel1;
+        private Button nextFrame;
+        private Button previousFrame;
+        private Label frameCounter;
+        private Button addFrame;
+        private Panel animatePanel;
+        private FlowLayoutPanel framesPanel;
     }
 }

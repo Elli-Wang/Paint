@@ -10,6 +10,9 @@ namespace ElliPAINTT
 {
     public partial class ElliPaintForm : Form
     {
+        const int ImageWidth = 430;
+        const int ImageHeight = 398;
+
         enum Shapes
         {
             Circle,
@@ -23,10 +26,6 @@ namespace ElliPAINTT
         {
             InitializeComponent();
         }
-
-        Image image;
-        Image customStamp;
-        Graphics gfx;
 
         Image smallImage;
         Graphics smallGfx;
@@ -47,16 +46,47 @@ namespace ElliPAINTT
         SerialPort port = new SerialPort("COM3", 115200);
 
 
+
+        int ___currentFrameIndexDoNotTouchManually = 0;
+        int CurrentFrameIndex // property that uses ___currentFrameIndexDoNotTouchManually but also sets Canvas.Image
+        {
+            get => ___currentFrameIndexDoNotTouchManually;
+            set
+            {
+                CurrentFrame.PictureBoxesToUpdate.Remove(Canvas);
+
+                ___currentFrameIndexDoNotTouchManually = value;
+                Canvas.Image = CurrentFrame.FrameImage;
+
+                CurrentFrame.PictureBoxesToUpdate.Add(Canvas);
+            }
+        }
+        Frame CurrentFrame => frames[CurrentFrameIndex];
+
+        // Property above ^^^ is equivalent to the functions below
+        //int GetCurrentFrameIndex() => ___currentFrameIndexDoNotTouchManually;
+        //void SetCurrentFrameIndex(int value)
+        //{
+        //    ___currentFrameIndexDoNotTouchManually = value;
+        //    Canvas.Image = CurrentFrame.FrameImage;
+        //}
+
+        List<Frame> frames = new List<Frame>();
+
+
         private void ElliPaintForm_Load(object sender, EventArgs e)
         {
-            Canvas.Image = new Bitmap(Canvas.Width, Canvas.Height);
+
+            Bitmap bitmap1 = new Bitmap(ImageWidth, ImageHeight);
+
+            AddFrame(bitmap1);
+
+            Canvas.Image = frames[0].FrameImage;
+            frames[0].PictureBoxesToUpdate.Add(Canvas);
             Canvas.SizeMode = PictureBoxSizeMode.Normal;
             Canvas.BorderStyle = BorderStyle.FixedSingle;
 
-            image = Canvas.Image;
-            gfx = Graphics.FromImage(image);
-
-            customStamp = image;
+            //customStamp = image;
             newBrush = Brushes.Black;
 
 
@@ -97,6 +127,25 @@ namespace ElliPAINTT
             */
         }
 
+        private void AddFrame(Bitmap bitmap)
+        {
+            Frame frame = new Frame(bitmap);
+
+            frames.Add(frame);
+            PictureBox pictureBox = new PictureBox();
+            pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox.Width = 60;
+            pictureBox.Height = 60;
+            pictureBox.Image = frame.FrameImage;
+            pictureBox.BorderStyle = BorderStyle.FixedSingle;
+            framesPanel.Controls.Add(pictureBox);
+
+            frame.PictureBoxesToUpdate.Add(pictureBox);
+
+            updateFrameDetails();
+        }
+        //custom class to track frames
+
         private void CircleBrush_Click(object sender, EventArgs e)
         {
             shape = Shapes.Circle;
@@ -135,30 +184,32 @@ namespace ElliPAINTT
             switch (shape)
             {
                 case Shapes.Circle:
-                    gfx.FillEllipse(newBrush, new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
+                    frames[CurrentFrameIndex].Gfx.FillEllipse(newBrush, new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
                     break;
 
                 case Shapes.Square:
-                    gfx.FillRectangle(newBrush, new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
+                    frames[CurrentFrameIndex].Gfx.FillRectangle(newBrush, new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
                     break;
 
                 case Shapes.Triangle:
-                    gfx.FillPolygon(newBrush, new Point[] {
+                    frames[CurrentFrameIndex].Gfx.FillPolygon(newBrush, new Point[] {
                         new Point(e.Location.X, e.Location.Y - (BrushHeight.Value / 2)),
                         new Point(e.Location.X - (BrushWidth.Value / 2), e.Location.Y + (BrushHeight.Value / 2)),
                         new Point(e.Location.X + (BrushWidth.Value / 2), e.Location.Y + (BrushHeight.Value / 2))
                     });
 
                     break;
-                case Shapes.Custom:
-                    gfx.DrawImage(customStamp, new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
-                    break;
+                //case Shapes.Custom:
+                //    frames[CurrentFrameIndex].Gfx.DrawImage(customStamp, new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
+                //    break;
                 case Shapes.Eraser:
-                    gfx.FillEllipse(new SolidBrush(this.BackColor), new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
+                    frames[CurrentFrameIndex].Gfx.FillEllipse(new SolidBrush(this.BackColor), new Rectangle(e.Location.X - BrushWidth.Value / 2, e.Location.Y - BrushHeight.Value / 2, BrushWidth.Value, BrushHeight.Value));
                     break;
 
             }
-            Canvas.Image = image;
+
+            frames[CurrentFrameIndex].UpdatePictureBoxes();
+            //Canvas.Image = image;
         }
 
         private void BrushWidth_Scroll(object sender, EventArgs e)
@@ -180,9 +231,9 @@ namespace ElliPAINTT
 
         private void clearCanvasButton_Click(object sender, EventArgs e)
         {
-            gfx.Clear(Color.Transparent);
+            frames[CurrentFrameIndex].Gfx.Clear(Color.Transparent);
 
-            Canvas.Image = image;
+            Canvas.Image = frames[CurrentFrameIndex].FrameImage;
         }
 
         private void Canvas_MouseDown(object sender, MouseEventArgs e)
@@ -215,13 +266,13 @@ namespace ElliPAINTT
         private void SaveConfirmButton_Click(object sender, EventArgs e)
         {
             RenameFilePanel.Visible = false;
-            image.Save($"{textBox1.Text}.png", ImageFormat.Png);
+            frames[CurrentFrameIndex].FrameImage.Save($"{textBox1.Text}.png", ImageFormat.Png);
 
-            Stamp myStamp = new Stamp(image, textBox1.Text);
-            myStamp.Name = textBox1.Text;
-            myStamp.Image = (Image)image.Clone();
+            //Stamp myStamp = new Stamp(image, textBox1.Text);
+            //myStamp.Name = textBox1.Text;
+            //myStamp.Image = (Image)image.Clone();
 
-            comboBox1.Items.Add(myStamp);
+            //comboBox1.Items.Add(myStamp);
         }
 
         private void LoadPreviousButton_Click(object sender, EventArgs e)
@@ -232,9 +283,9 @@ namespace ElliPAINTT
             string filePath = openFileDialog1.FileName;
             try
             {
-                image = Image.FromFile(filePath);
-                gfx = Graphics.FromImage(image);
-                Canvas.Image = image;
+                frames[CurrentFrameIndex].FrameImage = new Bitmap(Image.FromFile(filePath));
+                frames[CurrentFrameIndex].Gfx = Graphics.FromImage(frames[CurrentFrameIndex].FrameImage);
+                Canvas.Image = frames[CurrentFrameIndex].FrameImage;
             }
             catch (Exception ex)
             {
@@ -246,12 +297,12 @@ namespace ElliPAINTT
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ComboBox combobox = (ComboBox)sender;
-            object? stampAsObject = combobox.Items[combobox.SelectedIndex];
-            if (stampAsObject is Stamp stamp)
-            {
-                customStamp = stamp.Image;
-            }
+            //ComboBox combobox = (ComboBox)sender;
+            //object? stampAsObject = combobox.Items[combobox.SelectedIndex];
+            //if (stampAsObject is Stamp stamp)
+            //{
+            //    customStamp = stamp.Image;
+            //}
 
         }
 
@@ -293,8 +344,8 @@ namespace ElliPAINTT
         {
             List<byte> pixelRGBs = new List<byte>();
 
-            int sectionWidth = image.Width / colAmount;
-            int sectionHeight = image.Height / rowAmount;
+            int sectionWidth = frames[CurrentFrameIndex].FrameImage.Width / colAmount;
+            int sectionHeight = frames[CurrentFrameIndex].FrameImage.Height / rowAmount;
 
             smallImage = new Bitmap(colAmount * 10, rowAmount * 10);
             smallGfx = Graphics.FromImage(smallImage);
@@ -309,7 +360,7 @@ namespace ElliPAINTT
             {
                 for (int y = 0; y < rowAmount; y++)
                 {
-                    Color avgColor = GetAvgColor(image, x * sectionWidth, y * sectionHeight, sectionWidth, sectionHeight);
+                    Color avgColor = GetAvgColor(frames[CurrentFrameIndex].FrameImage, x * sectionWidth, y * sectionHeight, sectionWidth, sectionHeight);
 
                     pixelRGBs.Add(avgColor.R);
                     pixelRGBs.Add(avgColor.G);
@@ -428,7 +479,49 @@ namespace ElliPAINTT
             //port.Close();
         }
 
-        
+        private void animateOptions_Click(object sender, EventArgs e)
+        {
+            animatePanel.Visible = true;
+        }
+
+        private void addFrame_Click(object sender, EventArgs e)
+        {
+            AddFrame(new Bitmap(ImageWidth, ImageHeight));
+
+            if (CurrentFrameIndex < frames.Count - 1)
+            {
+                CurrentFrameIndex++;
+                updateFrameDetails();
+            }
+        }
+
+        private void nextFrame_Click(object sender, EventArgs e)
+        {
+            if(CurrentFrameIndex < frames.Count-1)
+            {
+                CurrentFrameIndex++;
+                updateFrameDetails();
+            }
+        }
+
+        private void previousFrame_Click(object sender, EventArgs e)
+        {
+            if(CurrentFrameIndex > 0)
+            {
+                CurrentFrameIndex--;
+                updateFrameDetails();
+            }
+        }
+
+        void updateFrameDetails()
+        {
+            frameCounter.Text = $"{CurrentFrameIndex + 1}/{frames.Count}";
+
+            // updating the border style of the current picture box frame 
+            :)
+        }
+
+
     }
 }
 
